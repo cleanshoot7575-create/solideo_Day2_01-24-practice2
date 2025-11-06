@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>여행 예약 시스템</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        .search-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+        }
+
+        .search-section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn-search {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-search:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .results-section {
+            max-height: 800px;
+            overflow-y: auto;
+        }
+
+        .results-section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .result-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .result-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .result-card.best-deal {
+            border-color: #4CAF50;
+            background: #f1f8f4;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .transport-type {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .transport-type.plane {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .transport-type.train {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .transport-type.bus {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .price-tag {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .price-tag.best {
+            color: #4CAF50;
+        }
+
+        .route-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 15px 0;
+        }
+
+        .location {
+            flex: 1;
+        }
+
+        .location-name {
+            font-weight: 600;
+            font-size: 1.2em;
+            color: #333;
+        }
+
+        .location-time {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .route-arrow {
+            margin: 0 20px;
+            color: #667eea;
+            font-size: 1.5em;
+        }
+
+        .details {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .detail-item {
+            text-align: center;
+        }
+
+        .detail-label {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .detail-value {
+            font-weight: 600;
+            color: #333;
+            margin-top: 5px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .badge.available {
+            background: #c8e6c9;
+            color: #2e7d32;
+        }
+
+        .badge.last-seats {
+            background: #ffecb3;
+            color: #f57f17;
+        }
+
+        .map-section {
+            grid-column: 1 / -1;
+            margin-top: 20px;
+        }
+
+        .map-section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        #map {
+            width: 100%;
+            height: 500px;
+            border-radius: 15px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .price-summary {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .price-summary h3 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+
+        .price-comparison {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .price-box {
+            background: rgba(255,255,255,0.2);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .price-box h4 {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .price-box .amount {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        @media (max-width: 968px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+
+            .price-comparison {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .real-time-badge {
+            display: inline-block;
+            background: #4CAF50;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            margin-left: 10px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✈️ 스마트 여행 예약 시스템</h1>
+            <p>실시간 교통편 검색 및 최저가 비교 서비스</p>
+        </div>
+
+        <div class="content">
+            <div class="search-section">
+                <h2>여행 정보 입력</h2>
+
+                <div class="form-group">
+                    <label>출발지</label>
+                    <input type="text" id="departure" placeholder="예: 서울, 부산, 제주도" value="서울">
+                </div>
+
+                <div class="form-group">
+                    <label>도착지</label>
+                    <input type="text" id="arrival" placeholder="예: 서울, 부산, 제주도" value="제주도">
+                </div>
+
+                <div class="form-group">
+                    <label>출발 날짜</label>
+                    <input type="date" id="departureDate">
+                </div>
+
+                <div class="form-group">
+                    <label>출발 시간</label>
+                    <input type="time" id="departureTime" value="09:00">
+                </div>
+
+                <div class="form-group">
+                    <label>교통수단 선택</label>
+                    <select id="transportType">
+                        <option value="all">전체</option>
+                        <option value="plane">비행기</option>
+                        <option value="train">기차</option>
+                        <option value="bus">버스</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>승객 수 (성인)</label>
+                    <input type="number" id="passengers" min="1" max="9" value="1">
+                </div>
+
+                <button class="btn-search" onclick="searchTransport()">
+                    🔍 실시간 검색하기
+                </button>
+            </div>
+
+            <div class="results-section">
+                <h2>검색 결과 <span class="real-time-badge">실시간</span></h2>
+                <div id="results">
+                    <div class="no-results">
+                        👆 왼쪽에서 여행 정보를 입력하고 검색해주세요
+                    </div>
+                </div>
+            </div>
+
+            <div class="map-section">
+                <h2>📍 목적지 관광 명소</h2>
+                <div id="map"></div>
+            </div>
+
+            <div class="price-summary" id="priceSummary" style="display: none;">
+                <h3>💰 총 비용 산정</h3>
+                <div class="price-comparison">
+                    <div class="price-box">
+                        <h4>🌟 최저 비용</h4>
+                        <div class="amount" id="lowestPrice">-</div>
+                    </div>
+                    <div class="price-box">
+                        <h4>📊 일반 비용</h4>
+                        <div class="amount" id="averagePrice">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 현재 날짜를 기본값으로 설정
+        document.getElementById('departureDate').valueAsDate = new Date();
+
+        // 실제 API 대신 사용할 샘플 데이터 (실시간 시뮬레이션)
+        const transportDatabase = {
+            "서울-제주도": [
+                {type: "plane", company: "대한항공", departure: "서울(김포)", arrival: "제주", departureTime: "09:00", arrivalTime: "10:10", duration: "1시간 10분", price: 89000, available: 15, cancelled: false},
+                {type: "plane", company: "아시아나항공", departure: "서울(김포)", arrival: "제주", departureTime: "09:30", arrivalTime: "10:40", duration: "1시간 10분", price: 85000, available: 8, cancelled: false},
+                {type: "plane", company: "제주항공", departure: "서울(김포)", arrival: "제주", departureTime: "10:00", arrivalTime: "11:10", duration: "1시간 10분", price: 65000, available: 23, cancelled: false},
+                {type: "plane", company: "진에어", departure: "서울(김포)", arrival: "제주", departureTime: "11:30", arrivalTime: "12:40", duration: "1시간 10분", price: 59000, available: 12, cancelled: false},
+                {type: "plane", company: "티웨이항공", departure: "서울(김포)", arrival: "제주", departureTime: "13:00", arrivalTime: "14:10", duration: "1시간 10분", price: 62000, available: 5, cancelled: false},
+            ],
+            "서울-부산": [
+                {type: "train", company: "KTX", departure: "서울역", arrival: "부산역", departureTime: "09:00", arrivalTime: "11:30", duration: "2시간 30분", price: 59800, available: 45, cancelled: false},
+                {type: "train", company: "KTX", departure: "서울역", arrival: "부산역", departureTime: "10:00", arrivalTime: "12:30", duration: "2시간 30분", price: 59800, available: 32, cancelled: false},
+                {type: "train", company: "SRT", departure: "수서역", arrival: "부산역", departureTime: "09:30", arrivalTime: "12:00", duration: "2시간 30분", price: 56100, available: 28, cancelled: false},
+                {type: "bus", company: "고속버스", departure: "서울고속터미널", arrival: "부산종합터미널", departureTime: "09:00", arrivalTime: "13:30", duration: "4시간 30분", price: 32000, available: 18, cancelled: false},
+                {type: "plane", company: "제주항공", departure: "서울(김포)", arrival: "부산(김해)", departureTime: "10:00", arrivalTime: "11:10", duration: "1시간 10분", price: 68000, available: 12, cancelled: false},
+            ],
+            "부산-제주도": [
+                {type: "plane", company: "대한항공", departure: "부산(김해)", arrival: "제주", departureTime: "09:00", arrivalTime: "10:00", duration: "1시간", price: 72000, available: 20, cancelled: false},
+                {type: "plane", company: "제주항공", departure: "부산(김해)", arrival: "제주", departureTime: "10:30", arrivalTime: "11:30", duration: "1시간", price: 55000, available: 15, cancelled: false},
+                {type: "plane", company: "에어부산", departure: "부산(김해)", arrival: "제주", departureTime: "14:00", arrivalTime: "15:00", duration: "1시간", price: 58000, available: 8, cancelled: false},
+            ]
+        };
+
+        // 관광 명소 데이터
+        const touristAttractions = {
+            "제주도": [
+                {name: "성산일출봉", lat: 33.4584, lng: 126.9428, description: "유네스코 세계자연유산"},
+                {name: "한라산", lat: 33.3616, lng: 126.5292, description: "한국 최고봉"},
+                {name: "협재해수욕장", lat: 33.3941, lng: 126.2397, description: "아름다운 백사장"},
+                {name: "천지연폭포", lat: 33.2473, lng: 126.5544, description: "제주 3대 폭포"},
+                {name: "만장굴", lat: 33.5297, lng: 126.7716, description: "세계자연유산 용암동굴"},
+            ],
+            "부산": [
+                {name: "해운대해수욕장", lat: 35.1587, lng: 129.1603, description: "한국 대표 해수욕장"},
+                {name: "광안리해수욕장", lat: 35.1532, lng: 129.1189, description: "광안대교 야경"},
+                {name: "감천문화마을", lat: 35.0976, lng: 129.0104, description: "산토리니 마을"},
+                {name: "태종대", lat: 35.0513, lng: 129.0857, description: "절벽과 바다 절경"},
+                {name: "자갈치시장", lat: 35.0963, lng: 129.0305, description: "한국 최대 수산시장"},
+            ],
+            "서울": [
+                {name: "경복궁", lat: 37.5796, lng: 126.9770, description: "조선왕조 궁궐"},
+                {name: "남산타워", lat: 37.5512, lng: 126.9882, description: "서울 전망대"},
+                {name: "명동", lat: 37.5636, lng: 126.9826, description: "쇼핑 거리"},
+                {name: "한강공원", lat: 37.5294, lng: 126.9349, description: "시민 휴식 공간"},
+                {name: "북촌한옥마을", lat: 37.5824, lng: 126.9833, description: "전통 한옥 마을"},
+            ]
+        };
+
+        let map;
+        let markers = [];
+
+        // Google Maps 초기화
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: {lat: 36.5, lng: 127.5},
+                zoom: 7
+            });
+        }
+
+        // 관광명소 표시
+        function showAttractions(destination) {
+            // 기존 마커 제거
+            markers.forEach(marker => marker.setMap(null));
+            markers = [];
+
+            const attractions = touristAttractions[destination];
+            if (!attractions) return;
+
+            // 지도 중심 이동
+            const bounds = new google.maps.LatLngBounds();
+
+            attractions.forEach(attraction => {
+                const position = {lat: attraction.lat, lng: attraction.lng};
+
+                const marker = new google.maps.Marker({
+                    position: position,
+                    map: map,
+                    title: attraction.name,
+                    animation: google.maps.Animation.DROP
+                });
+
+                const infoWindow = new google.maps.InfoWindow({
+                    content: `<div style="padding: 10px;">
+                        <h3 style="margin: 0 0 5px 0; color: #667eea;">${attraction.name}</h3>
+                        <p style="margin: 0; color: #666;">${attraction.description}</p>
+                    </div>`
+                });
+
+                marker.addListener('click', () => {
+                    infoWindow.open(map, marker);
+                });
+
+                markers.push(marker);
+                bounds.extend(position);
+            });
+
+            map.fitBounds(bounds);
+        }
+
+        // 교통편 검색
+        function searchTransport() {
+            const departure = document.getElementById('departure').value;
+            const arrival = document.getElementById('arrival').value;
+            const date = document.getElementById('departureDate').value;
+            const time = document.getElementById('departureTime').value;
+            const transportType = document.getElementById('transportType').value;
+            const passengers = parseInt(document.getElementById('passengers').value);
+
+            if (!departure || !arrival || !date) {
+                alert('출발지, 도착지, 날짜를 모두 입력해주세요.');
+                return;
+            }
+
+            // 로딩 표시
+            document.getElementById('results').innerHTML = '<div class="loading">🔄 실시간 정보를 검색하는 중...</div>';
+
+            // 실시간 검색 시뮬레이션 (0.5초 딜레이)
+            setTimeout(() => {
+                const route = `${departure}-${arrival}`;
+                let results = transportDatabase[route] || [];
+
+                // 교통수단 필터링
+                if (transportType !== 'all') {
+                    results = results.filter(r => r.type === transportType);
+                }
+
+                // 랜덤으로 일부 항공편 취소 시뮬레이션
+                results.forEach(r => {
+                    if (Math.random() > 0.9) {
+                        r.cancelled = true;
+                    }
+                });
+
+                displayResults(results, passengers);
+                showAttractions(arrival);
+            }, 500);
+        }
+
+        // 결과 표시
+        function displayResults(results, passengers) {
+            const resultsDiv = document.getElementById('results');
+
+            if (results.length === 0) {
+                resultsDiv.innerHTML = '<div class="no-results">😢 해당 구간의 교통편을 찾을 수 없습니다.</div>';
+                document.getElementById('priceSummary').style.display = 'none';
+                return;
+            }
+
+            // 가격순 정렬
+            results.sort((a, b) => a.price - b.price);
+
+            let html = '';
+            let prices = [];
+
+            results.forEach((result, index) => {
+                const totalPrice = result.price * passengers;
+                prices.push(totalPrice);
+
+                const isBestDeal = index === 0;
+                const availabilityClass = result.available > 10 ? 'available' : 'last-seats';
+                const availabilityText = result.available > 10 ? '예약 가능' : `잔여 ${result.available}석`;
+
+                if (result.cancelled) {
+                    return; // 취소된 항공편은 표시 안함
+                }
+
+                html += `
+                    <div class="result-card ${isBestDeal ? 'best-deal' : ''}">
+                        <div class="result-header">
+                            <div>
+                                <span class="transport-type ${result.type}">${getTransportIcon(result.type)} ${getTransportName(result.type)}</span>
+                                <span class="badge ${availabilityClass}">${availabilityText}</span>
+                                ${isBestDeal ? '<span style="color: #4CAF50; font-weight: bold; margin-left: 10px;">✨ 최저가</span>' : ''}
+                            </div>
+                            <div class="price-tag ${isBestDeal ? 'best' : ''}">${totalPrice.toLocaleString()}원</div>
+                        </div>
+
+                        <div style="font-size: 0.9em; color: #666; margin-bottom: 10px;">${result.company}</div>
+
+                        <div class="route-info">
+                            <div class="location">
+                                <div class="location-name">${result.departure}</div>
+                                <div class="location-time">${result.departureTime}</div>
+                            </div>
+                            <div class="route-arrow">✈️</div>
+                            <div class="location">
+                                <div class="location-name">${result.arrival}</div>
+                                <div class="location-time">${result.arrivalTime}</div>
+                            </div>
+                        </div>
+
+                        <div class="details">
+                            <div class="detail-item">
+                                <div class="detail-label">소요시간</div>
+                                <div class="detail-value">${result.duration}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">성인 1인</div>
+                                <div class="detail-value">${result.price.toLocaleString()}원</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">총 ${passengers}명</div>
+                                <div class="detail-value">${totalPrice.toLocaleString()}원</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            resultsDiv.innerHTML = html;
+
+            // 가격 요약 표시
+            if (prices.length > 0) {
+                const lowestPrice = Math.min(...prices);
+                const averagePrice = Math.round(prices.reduce((a, b) => a + b, 0) / prices.length);
+
+                document.getElementById('lowestPrice').textContent = lowestPrice.toLocaleString() + '원';
+                document.getElementById('averagePrice').textContent = averagePrice.toLocaleString() + '원';
+                document.getElementById('priceSummary').style.display = 'block';
+            }
+        }
+
+        function getTransportIcon(type) {
+            const icons = {
+                plane: '✈️',
+                train: '🚄',
+                bus: '🚌'
+            };
+            return icons[type] || '🚗';
+        }
+
+        function getTransportName(type) {
+            const names = {
+                plane: '비행기',
+                train: '기차',
+                bus: '버스'
+            };
+            return names[type] || '교통편';
+        }
+
+        // 페이지 로드 시 실행
+        window.onload = function() {
+            initMap();
+        };
+    </script>
+
+    <!-- Google Maps API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&callback=initMap" async defer></script>
+</body>
+</html>
